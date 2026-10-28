@@ -47,15 +47,6 @@ It also serves as the foundation for two downstream projects:
 | `Tracer`         | One structured event per step, written as JSONL; optional Langfuse exporter.   |
 | `Evals`          | Replay of saved traces plus a small task benchmark.                            |
 
-## Roadmap
-
-- [ ] **v0.1** — Runner + Claude adapter + ToolRegistry + one example agent, end to end, with tests
-- [ ] **v0.2** — Tracer + Policies
-- [ ] **v0.3** — ContextManager
-- [ ] **v0.4** — Evals (replay + benchmark)
-- [ ] **v0.5** — OpenAI-compatible adapter (Ollama) + MCP client; Alfred runs on Cerebro
-- [ ] **v0.6** — Oracle runs on Cerebro; refactor whatever didn't generalize
-
 Out of scope for now: graph/workflow DSL, UI, hosting.
 
 ## Getting started
