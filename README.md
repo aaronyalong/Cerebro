@@ -28,7 +28,9 @@ It also serves as the foundation for two downstream projects:
   imports a provider SDK.
 - **Hand-built core.** No LangChain, LangGraph, LlamaIndex, LiteLLM or similar.
   Dependencies are limited to official provider SDKs, pydantic and httpx.
-- **Clarity over cleverness.** Small modules, type hints throughout, explicit data flow.
+- **Async throughout.** Tool calls within a turn run concurrently; `run_sync()` keeps
+  scripts simple.
+- **Clarity over cleverness.** Small modules, explicit data flow, fully typed (strict pyright).
 - **Errors are data.** Bad tool arguments or failing tools are returned to the model
   as tool results so it can self-correct, instead of crashing the run.
 

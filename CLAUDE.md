@@ -34,7 +34,13 @@ core is built by hand. Alfred and Oracle (the owner's other projects) will depen
 
 ## Code conventions
 
-- Type hints on everything; keep code small and readable. Clarity over cleverness.
+- Type hints on everything, checked by **pyright in strict mode**. Keep code small and
+  readable. Clarity over cleverness.
+- **Async core.** `ModelClient`, tool execution and `Runner.run` are `async`; tool calls
+  within one turn run concurrently. `Runner.run_sync()` is the convenience entry point for
+  scripts. Tools may be sync (run via `asyncio.to_thread`) or async.
+- The library never reads `.env`; that is the calling app's job. Examples and live tests
+  use `uv run --env-file .env ...`.
 - Core data types are pydantic models (or frozen dataclasses where validation isn't needed).
 - Tool errors and invalid arguments are returned to the model as error tool results,
   not raised out of the loop.
@@ -48,9 +54,10 @@ core is built by hand. Alfred and Oracle (the owner's other projects) will depen
 ```bash
 uv sync                 # install deps
 uv run pytest           # unit tests (offline)
-uv run pytest -m live   # live provider tests (needs .env)
+uv run --env-file .env pytest -m live   # live provider tests
 uv run ruff check .     # lint
 uv run ruff format .    # format
+uv run pyright          # type check (strict)
 ```
 
 ## Layout
