@@ -7,7 +7,7 @@ loop, tool execution, context management, safety policies, tracing and evaluatio
 and talks to model providers directly through their official SDKs — no agent
 frameworks.
 
-> **Status:** early development (working towards v0.1).
+> **Status:** v0.1: Runner, Claude adapter and ToolRegistry working end to end.
 
 ## Why
 
@@ -59,7 +59,47 @@ uv sync
 uv run pytest
 ```
 
-Usage examples will be added as v0.1 lands.
+## Usage
+
+```python
+from cerebro import Agent, Runner, tool
+from cerebro.providers.claude import ClaudeClient
+
+
+@tool
+def add(a: int, b: int) -> int:
+    """Add two numbers."""
+    return a + b
+
+
+agent = Agent(
+    name="calc",
+    system_prompt="Use the tools to do arithmetic.",
+    model="claude-haiku-5-5",
+    tools=[add],
+)
+
+result = Runner(ClaudeClient()).run_sync(agent, "What is 19 + 23?")
+print(result.final_text)   # also: result.stop, result.usage, result.messages
+```
+
+The tool's schema comes from its type hints and its description from the docstring.
+Inside an event loop (FastAPI, Jupyter), use `await runner.run(...)` instead of `run_sync`.
+
+A fuller example, a notes assistant with read-only file tools, is in
+[examples/notes_agent](examples/notes_agent/agent.py):
+
+```bash
+uv run --env-file .env python -m examples.notes_agent.agent "When is the Alfred milestone?"
+```
+
+## Development
+
+```bash
+uv run pytest                            # unit tests (offline)
+uv run --env-file .env pytest -m live    # tests against the real API
+uv run ruff check . && uv run pyright    # lint + strict type check
+```
 
 ## License
 
