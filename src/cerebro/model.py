@@ -4,7 +4,7 @@ from typing import Literal, Protocol
 
 from cerebro.types import FrozenModel, Message, ToolSpec, Usage
 
-StopReason = Literal["end_turn", "tool_use", "max_tokens", "other"]
+StopReason = Literal["end_turn", "tool_use", "max_tokens", "refusal", "other"]
 
 
 class ModelRequest(FrozenModel):

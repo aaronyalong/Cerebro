@@ -8,7 +8,7 @@ from cerebro.model import ModelClient, ModelRequest, ModelResponse
 from cerebro.tools import ToolRegistry
 from cerebro.types import FrozenModel, Message, Usage
 
-StopKind = Literal["completed", "max_iterations", "max_tokens"]
+StopKind = Literal["completed", "max_iterations", "max_tokens", "refusal"]
 
 
 class RunResult(FrozenModel):
@@ -51,6 +51,10 @@ class Runner:
             if response.stop_reason == "max_tokens":
                 # The reply was cut off; any tool call in it may be incomplete.
                 stop = "max_tokens"
+                break
+
+            if response.stop_reason == "refusal":
+                stop = "refusal"
                 break
 
             calls = response.message.tool_calls

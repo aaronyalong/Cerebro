@@ -37,7 +37,22 @@ class ToolResult(FrozenModel):
     is_error: bool = False
 
 
-ContentBlock = Annotated[TextBlock | ToolCall | ToolResult, Field(discriminator="type")]
+class ProviderBlock(FrozenModel):
+    """A provider-specific block the core doesn't interpret, such as Claude's thinking.
+
+    The adapter that produced it sends it back unchanged; other adapters skip it.
+    """
+
+    type: Literal["provider"] = "provider"
+    provider: str
+    kind: str  # the provider's own block type, e.g. "thinking"
+    text: str = ""  # human-readable content, if any (for traces)
+    data: dict[str, Any]  # the raw block, exactly as the provider returned it
+
+
+ContentBlock = Annotated[
+    TextBlock | ToolCall | ToolResult | ProviderBlock, Field(discriminator="type")
+]
 
 Role = Literal["user", "assistant"]
 

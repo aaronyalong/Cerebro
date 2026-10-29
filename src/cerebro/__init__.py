@@ -7,6 +7,7 @@ from cerebro.tools import Tool, ToolRegistry, tool
 from cerebro.types import (
     ContentBlock,
     Message,
+    ProviderBlock,
     Role,
     TextBlock,
     ToolCall,
@@ -24,6 +25,7 @@ __all__ = [
     "ModelClient",
     "ModelRequest",
     "ModelResponse",
+    "ProviderBlock",
     "Role",
     "RunResult",
     "Runner",

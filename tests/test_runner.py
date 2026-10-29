@@ -112,6 +112,13 @@ async def test_stops_when_reply_is_truncated() -> None:
     assert result.final_text == "Once upon a"
 
 
+async def test_stops_on_refusal() -> None:
+    client = FakeModelClient([reply("I can't help with that.", stop_reason="refusal")])
+    result = await Runner(client).run(AGENT, "Something off-limits")
+
+    assert result.stop == "refusal"
+
+
 async def test_usage_is_summed_across_steps() -> None:
     client = FakeModelClient([tool_use(call("c1", "add", a=1, b=1)), reply("2")])
     result = await Runner(client).run(AGENT, "1+1")

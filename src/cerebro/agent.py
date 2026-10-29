@@ -12,7 +12,7 @@ class Agent:
     system_prompt: str
     model: str
     tools: Sequence[Tool] = ()
-    max_tokens: int = 4096
+    max_tokens: int = 16000
     # Hard cap on model calls per run. Moves into a policy in v0.2.
     max_iterations: int = 10
 
