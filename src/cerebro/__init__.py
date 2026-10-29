@@ -1,6 +1,7 @@
 """Cerebro: a minimal, readable, model-agnostic agent harness."""
 
 from cerebro.model import ModelClient, ModelRequest, ModelResponse, StopReason
+from cerebro.tools import Tool, ToolRegistry, tool
 from cerebro.types import (
     ContentBlock,
     Message,
@@ -23,8 +24,11 @@ __all__ = [
     "Role",
     "StopReason",
     "TextBlock",
+    "Tool",
     "ToolCall",
+    "ToolRegistry",
     "ToolResult",
     "ToolSpec",
     "Usage",
+    "tool",
 ]

@@ -12,6 +12,7 @@ dependencies = [
 dev = [
     "pyright>=1.1.390",
     "pytest>=8.3",
+    "pytest-asyncio>=1.4.1",
     "ruff>=0.8",
 ]
 
@@ -34,4 +35,6 @@ typeCheckingMode = "strict"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-m 'not live'"
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = ["live: calls a real model provider (needs API key in .env)"]
