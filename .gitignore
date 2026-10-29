@@ -25,3 +25,6 @@ traces/
 .vscode/
 .idea/
 .DS_Store
+
+# Local Claude Code instructions
+CLAUDE.md
