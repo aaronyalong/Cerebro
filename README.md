@@ -78,17 +78,17 @@ uv run --env-file .env python -m examples.notes_agent.agent "What do my notes sa
 
 ## Architecture
 
-| Component        | Responsibility                                                              | Status    |
-|------------------|-----------------------------------------------------------------------------|-----------|
-| `Agent`          | Declarative config: system prompt, model, tools and limits.                 | Available |
-| `Runner`         | The loop: call the model, run its tool calls, feed results back, stop.      | Available |
-| `ToolRegistry`   | Schemas from typed functions, argument validation, concurrent execution.    | Available |
-| `ModelClient`    | Provider interface. Adapters: Claude (available), OpenAI-compatible (planned, covers OpenAI and Ollama). | Partial |
-| `Tracer`         | One structured event per step, written as JSONL.                            | Planned   |
-| `Policies`       | Iteration, token and time limits; approval for side-effecting tools.        | Planned   |
-| `ContextManager` | Keeps long conversations within a token budget.                             | Planned   |
-| `Evals`          | Replay of saved traces plus a small task benchmark.                         | Planned   |
-| MCP              | Use tools from MCP servers.                                                 | Planned   |
+| Component        | Responsibility                                                              |
+|------------------|-----------------------------------------------------------------------------|
+| `Agent`          | Declarative config: system prompt, model, tools and limits.                 |
+| `Runner`         | The loop: call the model, run its tool calls, feed results back, stop.      |
+| `ToolRegistry`   | Schemas from typed functions, argument validation, concurrent execution.    |
+| `ModelClient`    | Provider interface plus adapters: Claude, and OpenAI-compatible (OpenAI and Ollama). |
+| `Tracer`         | One structured event per step, written as JSONL.                            |
+| `Policies`       | Iteration, token and time limits; approval for side-effecting tools.        |
+| `ContextManager` | Keeps long conversations within a token budget.                             |
+| `Evals`          | Replay of saved traces plus a small task benchmark.                         |
+| MCP              | Use tools from MCP servers.                                                 |
 
 ## Development
 
