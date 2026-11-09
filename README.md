@@ -1,65 +1,45 @@
 # Cerebro
 
-A minimal, readable, model-agnostic agent harness in Python, built from scratch.
+A minimal, readable, model-agnostic agent harness for Python.
 
-Cerebro turns a model plus a set of tools into a reliable agent. It owns the agent
-loop, tool execution, context management, safety policies, tracing and evaluation,
-and talks to model providers directly through their official SDKs — no agent
-frameworks.
+Cerebro turns a model plus a set of typed Python functions into a working agent. It
+owns the agent loop, tool execution and error handling, and talks to model providers
+directly through their official SDKs. No agent framework sits underneath.
 
-> **Status:** v0.1: Runner, Claude adapter and ToolRegistry working end to end.
+> **Status:** early development (v0.1). The core loop, tool registry and Claude adapter
+> work end to end; the API may still change between releases.
 
-## Why
+## Why Cerebro
 
-Agent frameworks hide the parts that matter most when an agent misbehaves: what was
-sent to the model, how tool calls were dispatched, why the loop stopped. Cerebro is a
-learning and portfolio project whose goal is to understand and own those internals.
-Every component is small enough to read in one sitting.
+When an agent misbehaves, the questions are always the same: what was sent to the
+model, how were the tool calls dispatched, and why did the loop stop? Large frameworks
+make those answers hard to find. Cerebro keeps every component small enough to read in
+one sitting, so you can see, and change, exactly what your agent does.
 
-It also serves as the foundation for two downstream projects:
-
-- **Alfred** — turns course files into practice tests.
-- **Oracle** — local RAG over an Obsidian vault.
-
-## Design principles
-
-- **Model-agnostic core.** The harness uses its own message and tool-call types.
-  Each provider adapter translates to and from them; nothing outside an adapter
-  imports a provider SDK.
-- **Hand-built core.** No LangChain, LangGraph, LlamaIndex, LiteLLM or similar.
-  Dependencies are limited to official provider SDKs, pydantic and httpx.
+- **Model-agnostic core.** Cerebro has its own message and tool-call types. Each
+  provider adapter translates to and from them, and nothing outside an adapter imports
+  a provider SDK.
+- **Minimal dependencies.** Just pydantic and the official provider SDKs.
+- **Typed tools, no boilerplate.** A tool's JSON schema is generated from its type hints
+  and its description from its docstring.
+- **Errors are data.** Invalid arguments and failing tools are returned to the model as
+  tool results, so it can correct itself instead of crashing the run.
 - **Async throughout.** Tool calls within a turn run concurrently; `run_sync()` keeps
   scripts simple.
-- **Clarity over cleverness.** Small modules, explicit data flow, fully typed (strict pyright).
-- **Errors are data.** Bad tool arguments or failing tools are returned to the model
-  as tool results so it can self-correct, instead of crashing the run.
+- **Fully typed.** Checked with pyright in strict mode.
 
-## Architecture
+## Installation
 
-| Component        | Responsibility                                                                 |
-|------------------|--------------------------------------------------------------------------------|
-| `Agent`          | Declarative config: system prompt, tools, model, policies.                     |
-| `Runner`         | The loop: call model → dispatch tool calls → feed results back → stop. The only component that knows about all the others. |
-| `ModelClient`    | Provider interface plus adapters (Claude first, then OpenAI-compatible, which covers OpenAI and Ollama). |
-| `ToolRegistry`   | Generates JSON schemas from typed Python functions, validates arguments, reports errors back to the model. Later: MCP tools. |
-| `ContextManager` | Keeps the conversation within a token budget (trimming, then compaction).      |
-| `Policies`       | Pre/post-step hooks: iteration, token and time limits; approval for side-effecting tools. |
-| `Tracer`         | One structured event per step, written as JSONL; optional Langfuse exporter.   |
-| `Evals`          | Replay of saved traces plus a small task benchmark.                            |
-
-Out of scope for now: graph/workflow DSL, UI, hosting.
-
-## Getting started
-
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.12+. Cerebro isn't on PyPI yet; install it from GitHub:
 
 ```bash
-cp .env.example .env   # then add your ANTHROPIC_API_KEY
-uv sync
-uv run pytest
+uv add git+https://github.com/aaronyalong/Cerebro
+# or: pip install git+https://github.com/aaronyalong/Cerebro
 ```
 
-## Usage
+The Claude adapter reads your key from the `ANTHROPIC_API_KEY` environment variable.
+
+## Quickstart
 
 ```python
 from cerebro import Agent, Runner, tool
@@ -83,19 +63,39 @@ result = Runner(ClaudeClient()).run_sync(agent, "What is 19 + 23?")
 print(result.final_text)   # also: result.stop, result.usage, result.messages
 ```
 
-The tool's schema comes from its type hints and its description from the docstring.
-Inside an event loop (FastAPI, Jupyter), use `await runner.run(...)` instead of `run_sync`.
+Inside an event loop (FastAPI, Jupyter), use `await runner.run(...)` instead of
+`run_sync`. To continue a conversation, pass `result.messages` plus a new user message
+back to `run`.
 
-A fuller example, a notes assistant with read-only file tools, is in
-[examples/notes_agent](examples/notes_agent/agent.py):
+## Examples
+
+[`examples/notes_agent`](examples/notes_agent/agent.py) is a notes assistant that
+answers questions using read-only tools over a folder of Markdown files:
 
 ```bash
-uv run --env-file .env python -m examples.notes_agent.agent "When is the Alfred milestone?"
+uv run --env-file .env python -m examples.notes_agent.agent "What do my notes say about MCP?"
 ```
+
+## Architecture
+
+| Component        | Responsibility                                                              | Status    |
+|------------------|-----------------------------------------------------------------------------|-----------|
+| `Agent`          | Declarative config: system prompt, model, tools and limits.                 | Available |
+| `Runner`         | The loop: call the model, run its tool calls, feed results back, stop.      | Available |
+| `ToolRegistry`   | Schemas from typed functions, argument validation, concurrent execution.    | Available |
+| `ModelClient`    | Provider interface. Adapters: Claude (available), OpenAI-compatible (planned, covers OpenAI and Ollama). | Partial |
+| `Tracer`         | One structured event per step, written as JSONL.                            | Planned   |
+| `Policies`       | Iteration, token and time limits; approval for side-effecting tools.        | Planned   |
+| `ContextManager` | Keeps long conversations within a token budget.                             | Planned   |
+| `Evals`          | Replay of saved traces plus a small task benchmark.                         | Planned   |
+| MCP              | Use tools from MCP servers.                                                 | Planned   |
 
 ## Development
 
 ```bash
+git clone https://github.com/aaronyalong/Cerebro && cd Cerebro
+cp .env.example .env                     # add your ANTHROPIC_API_KEY (only for live tests)
+uv sync
 uv run pytest                            # unit tests (offline)
 uv run --env-file .env pytest -m live    # tests against the real API
 uv run ruff check . && uv run pyright    # lint + strict type check
